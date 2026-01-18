@@ -1,0 +1,73 @@
+﻿@page
+@model IndexModel
+@{
+   ViewData["Title"] = "Home page";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+</div>
+
+<input type="text" id="messageInput" placeholder="Type your message" />
+<button onclick="sendMessage()">Send</button>
+<button onclick="startRecording()">Mic</button>
+
+<div id="chatBox"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chathub")
+        .build();
+
+    connection.on("ReceiveMessage", (user, message) => {
+        const chatBox = document.getElementById("chatBox");
+        chatBox.innerHTML += `<p><b>${user}:</b> ${message}</p>`;
+        speakText(message);
+    });
+
+    connection.on("ReceiveAudio", (user, audioChunk) => {
+        const chatBox = document.getElementById("chatBox");
+        // Convert byte array to Blob
+        const audioBlob = new Blob([audioChunk], { type: 'audio/wav' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        const audioElement = document.createElement('audio');
+        audioElement.src = audioUrl;
+        audioElement.controls = true;
+
+        const container = document.createElement('div');
+        container.innerHTML = `<b>${user}:</b> `;
+        container.appendChild(audioElement);
+
+        chatBox.appendChild(container);
+    });
+
+    connection.start();
+
+    function sendMessage() {
+        const message = document.getElementById("messageInput").value;
+        connection.invoke("SendMessage", "User", message);
+        document.getElementById("messageInput").value = '';
+    }
+
+    // Audio output using Speech Synthesis
+    function speakText(text) {
+        const msg = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(msg);
+    }
+
+    // Audio input using Web Speech API
+    function startRecording() {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            connection.invoke("SendMessage", "User", transcript);
+        };
+        recognition.start();
+    }
+</script>
+

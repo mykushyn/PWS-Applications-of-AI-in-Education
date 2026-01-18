@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prism AI — Prototype</title>
+  <link rel="icon" type="image/png" href="/img/logo.png" />
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo"><img src="/img/logo.png" alt="Prism AI logo" /></div>
+        <div>
+          <div style="font-weight:700">Prism AI</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Your virtual teacher</div>
+        </div>
+      </div>
+
+      <nav>
+        <a href="#home" class="nav-link" data-page="home">Home</a>
+        <a href="#about" class="nav-link" data-page="about">About</a>
+        <div class="nav-cta">
+          <button class="btn" id="loginBtn">Login</button>
+          <button class="btn primary" id="getStarted">Get Started</button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="appRoot">
+      <section id="home" class="hero" data-visible="true">
+        <div class="copy">
+          <h1>Your virtual teacher.<br/>Study and make homework more efficiently.</h1>
+          <p class="lead">Learn smarter with AI that teaches straight from your own books.</p>
+          <div class="cta-row">
+            <button class="btn primary" id="ctaGetStarted">Get Started Now →</button>
+            <div class="small">No credit card required • Student friendly</div>
+          </div>
+        </div>
+        <div class="card-mascot">
+          <div class="mascot">
+            <img src="/img/rc4.png" alt="mascot" style="width:90%;height:90%;object-fit:contain">
+          </div>
+        </div>
+      </section>
+      <section id="about" class="hero" style="display:none;" aria-labelledby="aboutTitle">
+        <div class="copy">
+          <h1 id="aboutTitle">About Prism AI</h1>
+          <p class="lead">
+            Prism AI helps students study smarter by turning textbooks into an interactive tutor.
+            It explains concepts, helps with homework, and can show step-by-step solutions.
+          </p>
+
+          <h3 style="margin-top:18px">About the creators</h3>
+          <p style="color:var(--muted);max-width:520px">
+          Hello! We are Tarek and Mykyta, two passionate students from Helen Parkhurst, a school in Almere, The Netherlands. As part of our PWS project, we developed Prism AI to revolutionize the way students learn. 
+          </p>
+
+          <div class="cta-row" style="margin-top:20px">
+          <a href="img/PWS_Applications of AI in Education.pdf" target="_blank">
+          <button class="btn primary">Check out our full PWS project</button>
+          </a>
+            <div class="small">Designed for highschoolers, by highschoolers</div>
+          </div>
+
+          <h3 style="margin-top:26px">Mission</h3>
+          <p style="color:var(--muted);max-width:520px">
+            Our goal is to create an accessible and effective learning tool that empowers students to reach their full potential and helps tackle teacher shortages all across the world. We believe that with the right resources, every student can succeed academically.
+          </p>
+
+          <h3 style="margin-top:18px">Contact</h3>
+          <p style="color:var(--muted);max-width:520px">
+            For partnerships or feedback, email <a href="mailto:almallouhitarek@gmail.com" style="color:#f7c2d9;text-decoration:underline">almallouhitarek@gmail.com</a> and <a href="mailto:ni.kushynov@gmail.com" style="color:#f7c2d9;text-decoration:underline">ni.kushynov@gmail.com</a>.
+          </p>
+          <h3 style="margin-top:18px">Disclaimer</h3>
+          <p style="color:#e75d5d;max-width:520px">
+          Please note that Prism AI is currently a <strong>prototype</strong>. Some features may not be fully functional, and responses might not always be accurate. This project is designed for demonstration purposes only.
+          </p>
+        </div>
+
+        <div class="card-mascot" aria-hidden="true">
+          <div class="mascot">
+            <img src="/img/rc2.png" alt="mascot" style="width:90%;height:90%;object-fit:contain">
+          </div>
+        </div>
+      </section>
+
+      <section id="assistant" style="display:none;margin-top:20px">
+        <div class="app">
+        <aside class="sidebar">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <strong>Prism AI</strong>
+            <small style="color:var(--muted);cursor:pointer" id="booksToggle">Books ▾</small>
+          </div>
+
+          <p style="font-size:12px;color:#f28c8c;margin:8px 0 14px 0;line-height:1.4">
+            Prototype notice: chat history and favorites are not saved.
+          </p>
+
+          <h3>Recents</h3>
+          <div class="recent-list" id="recentList"></div>
+
+          <h3>Favorites</h3>
+          <div class="recent-list" id="favList"></div>
+        </aside>
+          <div class="main-app">
+            <h1 style="font-size:42px" id="assistantTitle">No book selected</h1>
+            <h3 style="font-weight:600;color:var(--muted)">Hello! How can I assist you today?</h3>
+            <div class="chat-window" id="chatWindow"></div>
+          </div>
+        </div>
+
+        <div class="chat-input" role="search">
+          <input placeholder="Write your problem here" id="chatField" aria-label="Chat input" autocomplete="off">
+          <button class="icon-btn" id="sttBtn" title="Speech to text">🎤</button>
+          <button class="btn primary" id="sendBtn">Ask</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="left">
+        <h2>Please select<br/>Your book</h2>
+        <p>
+        Can't find your book?
+        <a
+          href="#"
+          style="color:#f7c2d9;text-decoration:underline;cursor:not-allowed"
+          title="This feature does not work in the prototype"
+        >
+          Suggest it here
+        </a>
+      </p>
+      </div>
+      <div class="right">
+        <div style="display:flex;justify-content:flex-end">
+          <button class="close-x" id="closeModal">✕</button>
+        </div>
+        <div class="book-list" id="bookList">
+          <div class="book" data-name="Nectar ed. 4.1 vwo 4 FLEX">
+            <img src="/img/biobook.png" alt="book1">
+            <div style="text-align:center;font-weight:600">Nectar ed. 4.1 vwo 4 FLEX</div>
+            <button class="select-btn">Select</button>
+          </div>
+          <div class="book" data-name="Systematische Natuurkunde 6 vwo">
+            <img src="/img/nabook.png" alt="book2">
+            <div style="text-align:center;font-weight:600">Systematische Natuurkunde 6 vwo</div>
+            <button class="select-btn">Select</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="loginBackdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog">
+      <div class="left">
+        <h2>Lets Get You<br/>Signed Up</h2>
+        <p>No charges, no fees.</p>
+      </div>
+      <div class="right">
+        <div style="display:flex;justify-content:flex-end">
+          <button class="close-x" id="closeLogin">✕</button>
+        </div>
+        <form style="padding:12px 18px;max-width:320px;margin-top:8px" id="loginForm" onsubmit="return false">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="********">
+          </div>
+          <button class="select-btn" style="width:100%" id="loginSubmit">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.querySelector('.brand').addEventListener('click', () => showPage('home'));
+const navLinks = document.querySelectorAll('.nav-link');
+navLinks.forEach(a => a.addEventListener('click', e => {
+  e.preventDefault();
+  const p = a.dataset.page;
+  if (p) showPage(p);
+}));
+
+function showPage(page) {
+  document.getElementById('home').style.display = page === 'home' ? '' : 'none';
+  document.getElementById('assistant').style.display = page === 'assistant' ? '' : 'none';
+  document.getElementById('about').style.display = page === 'about' ? '' : 'none';
+
+  const heroSections = document.querySelectorAll('.hero');
+  heroSections.forEach(s => s.dataset.visible = (s.id === page) ? "true" : "false");
+
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (err) {}
+}
+
+const getStartedBtn = document.getElementById('getStarted');
+const ctaGetStarted = document.getElementById('ctaGetStarted');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const loginBackdrop = document.getElementById('loginBackdrop');
+const closeModal = document.getElementById('closeModal');
+const closeLogin = document.getElementById('closeLogin');
+const loginBtn = document.getElementById('loginBtn');
+const booksToggle = document.getElementById('booksToggle');
+
+function openBookModal() {
+  modalBackdrop.classList.add('show');
+  modalBackdrop.setAttribute('aria-hidden', 'false');
+}
+
+function closeBookModal() {
+  modalBackdrop.classList.remove('show');
+  modalBackdrop.setAttribute('aria-hidden', 'true');
+}
+
+getStartedBtn.addEventListener('click', e => { e.preventDefault(); openBookModal(); });
+ctaGetStarted.addEventListener('click', e => { e.preventDefault(); openBookModal(); });
+if (booksToggle) {
+  booksToggle.addEventListener('click', openBookModal);
+}
+
+closeModal.addEventListener('click', () => closeBookModal());
+closeLogin.addEventListener('click', () => {
+  loginBackdrop.classList.remove('show');
+  loginBackdrop.setAttribute('aria-hidden', 'true');
+});
+loginBtn.addEventListener('click', () => {
+  loginBackdrop.classList.add('show');
+  loginBackdrop.setAttribute('aria-hidden', 'false');
+});
+
+document.querySelectorAll('#bookList .book').forEach(bookEl => {
+  const btn = bookEl.querySelector('.select-btn');
+  btn.addEventListener('click', () => {
+    const name = bookEl.dataset.name || 'Selected Book';
+    selectedBookName = name;
+    document.getElementById('assistantTitle').textContent = name;
+    const chatWindow = document.getElementById('chatWindow');
+    chatWindow.innerHTML = '';
+    closeBookModal();
+    showPage('assistant');
+    document.getElementById('chatField').focus();
+  });
+});
+
+document.getElementById('loginSubmit').addEventListener('click', () => {
+const email = document.getElementById('email').value || "user";
+alert(
+  "Logged in as " + email +
+  "\n\nNote: This is a prototype. You did not actually log in and no data was stored."
+);
+  loginBackdrop.classList.remove('show');
+  loginBackdrop.setAttribute('aria-hidden', 'true');
+});
+
+modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeBookModal(); });
+loginBackdrop.addEventListener('click', e => { if (e.target === loginBackdrop) closeLogin.click(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeBookModal();
+    loginBackdrop.classList.remove('show');
+    loginBackdrop.setAttribute('aria-hidden', 'true');
+  }
+});
+
+const chatWindow = document.getElementById('chatWindow');
+const chatField = document.getElementById('chatField');
+const sendBtn = document.getElementById('sendBtn');
+const sttBtn = document.getElementById('sttBtn');
+
+function renderMarkdown(md) {
+  return md
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\n/g, "<br>");
+}
+
+function appendMessage(role, text) {
+  const msg = document.createElement('div');
+  msg.className = 'message ' + (role === 'user' ? 'user' : 'assistant');
+  msg.innerHTML = renderMarkdown(text);
+  chatWindow.appendChild(msg);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+
+  renderMathInElement(msg, {
+    delimiters: [
+      { left: "$$", right: "$$", display: true },
+      { left: "\\[", right: "\\]", display: true },
+      { left: "$", right: "$", display: false },
+      { left: "\\(", right: "\\)", display: false }
+    ]
+  });
+}
+
+const connection = new signalR.HubConnectionBuilder()
+  .withUrl("/chathub")
+  .configureLogging(signalR.LogLevel.Information)
+  .build();
+
+connection.start()
+  .then(() => console.log("Connected to SignalR"))
+  .catch(err => console.error("SignalR error:", err));
+
+connection.on("ReceiveMessage", (user, message) => {
+  if (user === "AI") {
+    stopAudioImmediately(); 
+    appendMessage("assistant", message);
+  }
+});
+
+let ttsEnabled = false;
+let currentAudio = null;
+
+const ttsBtn = document.createElement('button');
+ttsBtn.id = "ttsToggle";
+ttsBtn.innerHTML = "🔇";    
+ttsBtn.className = "icon-btn";
+ttsBtn.style.display = "grid";
+ttsBtn.style.placeItems = "center";
+ttsBtn.title = "Enable AI Voice";
+
+ttsBtn.onclick = () => {
+  ttsEnabled = !ttsEnabled;
+
+  if (!ttsEnabled) {
+    stopAudioImmediately();
+    ttsBtn.innerHTML = "🔇";
+    ttsBtn.title = "Enable AI Voice";
+  } else {
+    ttsBtn.innerHTML = "🔊";
+    ttsBtn.title = "Disable AI Voice";
+  }
+};
+
+document.querySelector('.chat-input').prepend(ttsBtn);
+
+function stopAudioImmediately() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.src = "";
+    currentAudio = null;
+  }
+}
+
+connection.on("ReceiveAudio", (user, audioBytes) => {
+  if (!ttsEnabled) return; 
+  stopAudioImmediately(); 
+
+  try {
+    let byteArray;
+    if (typeof audioBytes === 'string') {
+      const binaryString = atob(audioBytes);
+      byteArray = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        byteArray[i] = binaryString.charCodeAt(i);
+      }
+    } else {
+      byteArray = new Uint8Array(audioBytes);
+    }
+
+    const blob = new Blob([byteArray], { type: "audio/mpeg" });
+    const url = URL.createObjectURL(blob);
+
+    currentAudio = new Audio(url);
+    currentAudio.play().catch(err => console.error("Play error:", err));
+
+    currentAudio.onended = () => {
+      URL.revokeObjectURL(url);
+      currentAudio = null;
+    };
+  } catch (err) {
+    console.error("ReceiveAudio error:", err);
+  }
+});
+
+async function sendChatMessage(text) {
+  if (!text) return;
+  stopAudioImmediately(); 
+  appendMessage("user", text);
+  chatField.value = "";
+  try {
+    await connection.invoke("SendMessage", "User", text, selectedBookName);
+  } catch (err) {
+    console.error("SendMessage error:", err);
+    appendMessage("assistant", "⚠️ Unable to send message.");
+  }
+}
+
+sendBtn.addEventListener("click", () => sendChatMessage(chatField.value.trim()));
+chatField.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage(chatField.value.trim());
+  }
+});
+
+let recognizing = false;
+let ignoreEnd = false;
+let finalTranscript = "";
+let speechTimeout = null;
+let silenceDuration = 1400;
+
+let recognition = null;
+
+function initMicRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    sttBtn.disabled = true;
+    sttBtn.title = "SpeechRecognition not supported";
+    return;
+  }
+
+  recognition = new SR();
+  recognition.lang = "nl-NL";
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    recognizing = true;
+    finalTranscript = "";
+    clearTimeout(speechTimeout);
+    sttBtn.classList.add("active");
+    sttBtn.title = "Luistert... / Listening...";
+  };
+
+  recognition.onresult = (event) => {
+    let interim = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalTranscript += transcript.trim() + " ";
+      else interim += transcript;
+    }
+
+    const combined = (finalTranscript + interim).trim();
+    chatField.value = combined;
+
+    const english = /[a-zA-Z]/.test(combined);
+    try { recognition.lang = english ? "en-US" : "nl-NL"; } catch {}
+
+    clearTimeout(speechTimeout);
+    speechTimeout = setTimeout(() => {
+      if (recognizing) stopRecognition(true);
+    }, silenceDuration);
+  };
+
+  recognition.onerror = () => {
+    if (recognizing) stopRecognition(false);
+  };
+
+  recognition.onend = () => {
+    if (!ignoreEnd && recognizing) stopRecognition(false);
+  };
+}
+
+function stopRecognition(autoSend) {
+  recognizing = false;
+  sttBtn.classList.remove("active");
+  sttBtn.title = "Speech to text";
+
+  clearTimeout(speechTimeout);
+
+  try { recognition.stop(); } catch {}
+
+  const msg = finalTranscript.trim();
+  finalTranscript = "";
+
+  if (autoSend && msg.length > 0) {
+    sendChatMessage(msg);
+  }
+}
+
+function toggleMic() {
+  if (!recognition) initMicRecognition();
+
+  if (!recognizing) {
+    ignoreEnd = true;
+    try { recognition.stop(); } catch {}
+    setTimeout(() => {
+      ignoreEnd = false;
+      finalTranscript = "";
+      try { recognition.start(); } catch {}
+    }, 80);
+  } else {
+    stopRecognition(true);
+  }
+}
+
+sttBtn.addEventListener("click", toggleMic);
+
+window.addEventListener("beforeunload", () => {
+  try { recognition && recognition.stop(); } catch {}
+});
+</script>
+</body>
+</html>
